@@ -10,6 +10,7 @@ public class VPPipelineTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V7;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
+		BuildVersion = "1.0.0.0";
 		ExtraModuleNames.Add("VPPipeline");
 	}
 }

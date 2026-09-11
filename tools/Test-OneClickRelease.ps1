@@ -369,11 +369,12 @@ foreach ($Rule in $ForbiddenChecks) {
 $Launcher = Get-Item -LiteralPath (Join-Path $ReleaseRoot "VirtualProductionPipeline.exe") -ErrorAction SilentlyContinue
 if ($null -ne $Launcher) {
     if ($Launcher.VersionInfo.ProductName -eq "Virtual Production Pipeline" -and
-        $Launcher.VersionInfo.FileVersion -eq "0.1.0.0") {
-        Add-Result "PASS" "Launcher metadata" "Virtual Production Pipeline 0.1.0.0"
+        $Launcher.VersionInfo.FileVersion -eq "1.0.0.0" -and
+        $Launcher.VersionInfo.ProductVersion -eq "1.0.0.0") {
+        Add-Result "PASS" "Launcher metadata" "Virtual Production Pipeline 1.0.0.0"
     }
     else {
-        Add-Result "FAIL" "Launcher metadata" "Product='$($Launcher.VersionInfo.ProductName)', FileVersion='$($Launcher.VersionInfo.FileVersion)'"
+        Add-Result "FAIL" "Launcher metadata" "Product='$($Launcher.VersionInfo.ProductName)', FileVersion='$($Launcher.VersionInfo.FileVersion)', ProductVersion='$($Launcher.VersionInfo.ProductVersion)'"
     }
 }
 
@@ -381,11 +382,13 @@ $RuntimeBinary = $AllFiles | Where-Object {
     (Get-RelativeReleasePath $_.FullName) -match '(?i)^Runtime[\\/]VPPipeline[\\/]Binaries[\\/]Win64[\\/]VPPipeline.*\.exe$'
 } | Select-Object -First 1
 if ($null -ne $RuntimeBinary) {
-    if ($RuntimeBinary.VersionInfo.ProductName -eq "Virtual Production Pipeline") {
-        Add-Result "PASS" "Unreal metadata" "ProductName is Virtual Production Pipeline."
+    if ($RuntimeBinary.VersionInfo.ProductName -eq "Virtual Production Pipeline" -and
+        $RuntimeBinary.VersionInfo.FileVersion -eq "1.0.0.0" -and
+        $RuntimeBinary.VersionInfo.ProductVersion -eq "1.0.0.0") {
+        Add-Result "PASS" "Unreal metadata" "Virtual Production Pipeline 1.0.0.0"
     }
     else {
-        Add-Result "FAIL" "Unreal metadata" "ProductName='$($RuntimeBinary.VersionInfo.ProductName)'"
+        Add-Result "FAIL" "Unreal metadata" "Product='$($RuntimeBinary.VersionInfo.ProductName)', FileVersion='$($RuntimeBinary.VersionInfo.FileVersion)', ProductVersion='$($RuntimeBinary.VersionInfo.ProductVersion)'"
     }
 }
 else {
