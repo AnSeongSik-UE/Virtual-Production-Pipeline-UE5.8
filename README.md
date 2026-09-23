@@ -8,13 +8,15 @@
 
 추적과 렌더링은 사용자의 PC 안에서 처리됩니다. 원본 웹캠 영상과 앱 조작 화면은 OBS에 전달되지 않습니다.
 
+> **AI-assisted development:** 기능 목표와 문제 상황은 직접 정의하고, 코드 검토·원인 분석·수정에는 OpenAI Codex를 활용했습니다. 수정 결과는 Python·Unreal 빌드와 실제 웹캠·VRM·Spout·OBS 환경에서 직접 검증했습니다.
+
 ## 목차
 
 - [Windows 앱 실행](#windows-앱-실행)
 - [주요 기능](#주요-기능)
 - [구현 구조](#구현-구조)
 - [주요 문제 해결](#주요-문제-해결)
-- [VPTP 통신 규격](#vptp-통신-규격)
+- [Binary UDP 통신 규격](#binary-udp-통신-규격)
 - [소스 빌드](#소스-빌드)
 - [프로젝트 구성](#프로젝트-구성)
 - [검증 결과](#검증-결과)
@@ -56,7 +58,7 @@
 | 아바타 제어 | [`VPAnimInstance`](./VPPipeline/Plugins/VPTrackerReceiver/Source/VPTrackerReceiver/Private/VPAnimInstance.cpp)가 표정·머리·상완 움직임을 적용합니다. |
 | 방송 출력 | [`VPBroadcastRenderer`](./VPPipeline/Plugins/VPBroadcastRenderer/Source/VPBroadcastRenderer/Private/VPBroadcastRenderer.cpp)가 아바타와 배경을 합성해 앱 미리보기와 Spout에 전달합니다. |
 | 실행 관리 | [`supervisor.py`](./vp-tracker/supervisor.py)가 앱과 트래커를 함께 시작하고 종료하며 중복 실행과 웹캠 점유를 방지합니다. |
-| 사용자 화면 | [`VPTrackingDashboard`](./VPPipeline/Source/VPPipeline/VPTrackingDashboard.cpp)를 C++ UMG로 구현했습니다. |
+| 사용자 화면 | [`VPTrackingDashboard`](./VPPipeline/Source/VPPipeline/VPTrackingDashboard.cpp) 기반 C++ UMG 화면에서 트래킹·아바타·방송 설정을 제공합니다. |
 
 ## 구현 구조
 
@@ -94,16 +96,16 @@ VRM 선택창은 트래킹과 분리해 실행합니다. 선택창이 열린 상
 
 ![앱 미리보기와 OBS 수신 화면](Docs/Media/virtual-production-pipeline-obs.png)
 
-## VPTP 통신 규격
+## Binary UDP 통신 규격
 
-MediaPipe 결과는 `127.0.0.1:7000`으로만 전송합니다. VPTP 3은 928바이트 고정 크기이며 수신기는 식별자, 버전, 플래그, 항목 수, 패킷 길이와 각 수치의 유효 범위를 확인합니다. 별도 애플리케이션 체크섬은 사용하지 않으며 UDP 체크섬과 수신 검증으로 같은 PC 안의 통신 오류를 거릅니다.
+MediaPipe 결과는 `127.0.0.1:7000`으로만 전송합니다. 현재 규격은 928바이트 고정 크기이며 수신기는 식별자, 버전, 플래그, 항목 수, 패킷 길이와 각 수치의 유효 범위를 확인합니다. 별도 애플리케이션 체크섬은 사용하지 않으며 UDP 체크섬과 수신 검증으로 같은 PC 안의 통신 오류를 거릅니다.
 
 <details>
-<summary>VPTP 3 패킷 구조 보기</summary>
+<summary>928바이트 패킷 구조 보기</summary>
 
 | 위치 | 형식 | 내용 |
 |---:|---|---|
-| 0 | `char[4]` | 식별자 `VPTP` |
+| 0 | `char[4]` | 4바이트 식별자 |
 | 4 | `uint8` | 규격 버전 `3` |
 | 5 | `uint8` | bit 0: 얼굴 추적, bit 1: 포즈 추적 |
 | 6 | `uint16` | 예약 영역, 반드시 `0` |
@@ -180,7 +182,7 @@ Virtual-Production-Pipeline/
 
 ## 개발 방식과 역할
 
-요구사항과 기능 범위, Python–Unreal 통신 구조와 검증 기준은 직접 정의했습니다. OpenAI Codex를 코드 작성과 반복 검증에 활용했으며, 결과물은 Python 테스트·Unreal 자동화 테스트·Win64 빌드와 웹캠·VRM·Spout·OBS 실제 실행으로 확인했습니다.
+기능 목표와 문제 상황을 자연어로 정의하고 OpenAI Codex에 코드 검토·원인 분석·수정과 기능 추가를 요청했습니다. 수정 결과는 Python 테스트·Unreal 자동화 테스트·Win64 빌드와 실제 웹캠·VRM·Spout·OBS 환경에서 직접 실행해 확인했습니다. 사용 과정에서 발견한 문제와 필요한 기능을 다시 자연어로 제시하며 반복적으로 개선했습니다.
 
 ## 주의사항
 
