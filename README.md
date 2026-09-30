@@ -1,4 +1,5 @@
 # Virtual Production Pipeline
+기간: 2026.08 ~ 2026.09
 
 <p align="center">
   <img src="./Virtual%20Production%20Pipeline.gif" alt="Virtual Production Pipeline demo">
